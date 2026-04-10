@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tic Tac Toe AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>🤖 Tic-Tac-Toe AI</h1>
+
+<div id="game">
+    <div class="cell" onclick="makeMove(0)"></div>
+    <div class="cell" onclick="makeMove(1)"></div>
+    <div class="cell" onclick="makeMove(2)"></div>
+    <div class="cell" onclick="makeMove(3)"></div>
+    <div class="cell" onclick="makeMove(4)"></div>
+    <div class="cell" onclick="makeMove(5)"></div>
+    <div class="cell" onclick="makeMove(6)"></div>
+    <div class="cell" onclick="makeMove(7)"></div>
+    <div class="cell" onclick="makeMove(8)"></div>
+</div>
+
+<h2 id="status"></h2>
+<button onclick="resetGame()">Restart</button>
+
+<script>
+let board = ["","","","","","","","",""];
+let gameOver = false;
+
+function makeMove(index) {
+    if (board[index] !== "" || gameOver) return;
+
+    board[index] = "X";
+    updateUI();
+
+    fetch("/move", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({board: board})
+    })
+    .then(res => res.json())
+    .then(data => {
+        board = data.board;
+        updateUI();
+
+        if (data.winner) {
+            showWinner(data.winner);
+        }
+    });
+}
+
+function updateUI() {
+    let cells = document.getElementsByClassName("cell");
+    for (let i = 0; i < 9; i++) {
+        cells[i].innerText = board[i];
+    }
+}
+
+function showWinner(winner) {
+    gameOver = true;
+    let status = document.getElementById("status");
+
+    if (winner === "draw") {
+        status.innerText = "It's a Draw!";
+    } else {
+        status.innerText = winner + " Wins!";
+    }
+}
+
+function resetGame() {
+    board = ["","","","","","","","",""];
+    gameOver = false;
+    document.getElementById("status").innerText = "";
+    updateUI();
+}
+</script>
+
+</body>
+</html>
